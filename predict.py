@@ -1,21 +1,31 @@
 from ultralytics import YOLO
 import cv2
+import numpy as np
 
-# 1. Load your trained model
-model = YOLO(r'C:\Users\heman\car project\runs\detect\train\weights\best.pt')
+# 1. Load your model
+model = YOLO('best.pt')
 
-# 2. Open the webcam (0 is default)
+# 2. Open the webcam
 cap = cv2.VideoCapture(0)
 
-print("Live Detection with Counter Started... Press 'q' to exit.")
+print("Live Detection Started... Press 'q' to exit.")
 
 while cap.isOpened():
     success, frame = cap.read()
     if not success:
         break
 
-    # Run detection (keep imgsz=320 for speed)
-    results = model.predict(frame, imgsz=320, conf=0.5, stream=True)
+    # 3. RUN DETECTION (We use .predict to avoid the 'lap' tracking error)
+    # This will give you boxes and labels, but without the 'ID' numbers for now
+    # Fine-tuned for shaky/handheld video
+    # Force the tracker to use scipy instead of the broken 'lap' library
+    results = model.track(
+        frame, 
+        imgsz=320, 
+        conf=0.3, 
+        persist=True, 
+        tracker="bytetrack.yaml"
+    )
 
     for r in results:
         # Create a dictionary to count detections for this frame
@@ -27,11 +37,11 @@ while cap.isOpened():
         # Draw the boxes and labels
         annotated_frame = r.plot()
 
-        # Create the counter text
-        y_offset = 40
-        cv2.putText(annotated_frame, "LIVE VEHICLE COUNT:", (10, 30), 
+        # 4. DRAW THE COUNTER TEXT (Custom HEM Header)
+        cv2.putText(annotated_frame, "VEHICLE COUNT BY HEM:", (10, 30), 
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
         
+        y_offset = 40
         for vehicle, count in counts.items():
             text = f"{vehicle}: {count}"
             cv2.putText(annotated_frame, text, (10, y_offset + 20), 

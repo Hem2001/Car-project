@@ -1,4 +1,10 @@
+import sys
+# This trick blocks the 'lap' error on the web server
+sys.modules['lap'] = None 
+
 import streamlit as st
+from ultralytics import YOLO
+# ... the rest of your code ...import streamlit as st
 from ultralytics import YOLO
 import cv2
 from PIL import Image
@@ -20,7 +26,8 @@ if img_file:
     
     # Run Detection
     # Using track for the web app to keep detections constant
-    results = model.track(img_array, persist=True, conf=0.4)
+    # Faster tracking for the web
+results = model.track(img_array, persist=True, conf=0.4, imgsz=320, tracker="bytetrack.yaml")
     
     # Show Results
     res_plotted = results[0].plot()
