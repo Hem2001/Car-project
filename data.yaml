@@ -1,0 +1,5 @@
+train: C:\Users\heman\car project\my_datasets\car_data\train\images
+val: C:\Users\heman\car project\my_datasets\car_data\val\images
+
+nc: 6 
+names: ['car', 'rickshaw', 'motorbike', 'truck', 'van', 'other']
