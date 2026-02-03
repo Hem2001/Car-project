@@ -1,19 +1,16 @@
-import sys
-# This trick blocks the 'lap' error on the web server
-sys.modules['lap'] = None 
-
 import streamlit as st
 from ultralytics import YOLO
 import cv2
 from PIL import Image
 import numpy as np
 
+# Page Config
 st.set_page_config(page_title="Hem's Vehicle Tracker", layout="wide")
 
 st.title("🚗 Vehicle Detection & Counter")
 st.write("### 97% Accuracy Model - Created by Hem")
 
-# Load your model
+# Load your model safely
 @st.cache_resource
 def load_model():
     return YOLO('best.pt')
@@ -28,9 +25,9 @@ if img_file:
     img = Image.open(img_file)
     img_array = np.array(img)
     
-    # 2. Run Detection (Properly Indented)
-    # Using track for the web app to keep detections constant
-    results = model.track(img_array, persist=True, conf=0.4, imgsz=320, tracker="bytetrack.yaml")
+    # 2. Run Prediction (This avoids the 'lap' error completely)
+    # We use .predict instead of .track for 100% web stability
+    results = model.predict(img_array, conf=0.4, imgsz=320)
     
     # 3. Plot and Display
     res_plotted = results[0].plot()
@@ -39,14 +36,14 @@ if img_file:
     # 4. Show Counts
     st.write("### 📊 Detection Results")
     counts = {}
-    for c in results[0].boxes.cls:
-        label = model.names[int(c)]
-        counts[label] = counts.get(label, 0) + 1
-    
-    if counts:
-        # Create columns to show counts neatly
+    if len(results[0].boxes) > 0:
+        for c in results[0].boxes.cls:
+            label = model.names[int(c)]
+            counts[label] = counts.get(label, 0) + 1
+        
+        # Display metrics
         cols = st.columns(len(counts))
         for i, (label, count) in enumerate(counts.items()):
             cols[i].metric(label.upper(), count)
     else:
-        st.write("No vehicles detected in this frame.")
+        st.info("No vehicles detected. Try a different angle or closer shot!")
