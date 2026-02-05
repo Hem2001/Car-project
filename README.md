@@ -63,3 +63,10 @@ Engineering Fix: Implemented a cv2.resize scaling factor and INTER_CUBIC interpo
 Challenge: Processing high-resolution video with both Tracking and OCR caused significant CPU lag.
 
 Solution: Designed an Event-Driven OCR logic. Instead of scanning every frame, the script only triggers the heavy OCR engine at the exact moment a vehicle crosses the virtual "trip-wire," saving approximately 70% of processing power.
+
+python detect_photo.py
+### 🏆 Final Check
+Go to your GitHub URL in your browser. You should now see:
+* Your new `detect_photo.py` file.
+* The updated `predict.py`.
+* A fresh "commit" timestamp from a few minutes ago.
